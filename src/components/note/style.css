@@ -1,0 +1,13 @@
+.note {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.date {
+    font-size: 10px;
+}
+
+.text {
+    margin-top: 5px;
+}
