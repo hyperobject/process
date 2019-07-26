@@ -4,7 +4,9 @@ import Thought from "../../models/thought";
 import Note from "../note";
 import * as style from './style.module.css'
 import gql from 'graphql-tag';
-import { Query, Mutation, MutationFn } from 'react-apollo';
+import { Query, Mutation, MutationFn, FetchResult } from 'react-apollo';
+import { DataProxy } from 'apollo-cache';
+import { Box, Heading, InfiniteScroll } from 'grommet';
 
 interface State {
     thoughts: Thought[]
@@ -40,26 +42,36 @@ export default class Thoughtbox extends React.Component<{}, State> {
     }
     public render() {
         return (
-            <div className={style.thoughtbox}>
-                <div className={style.header}>
+            <Box gridArea="notes" style={{
+                maxHeight: "100vh"
+            }}>
+                {/* <div className={style.header}>
                     <h3>Thoughts</h3>
                     <p>What's on your mind?</p>
-                </div>
+                </div> */}
+                <Heading level="4">Thoughts</Heading>
                 <div className={style.list}>
                     <Query<{notes: Thought[]}> query={GET_NOTES}>
                     {({ loading, error, data, client }) => {
                         console.log(client.typeDefs)
                         if (loading || !data) return "Loading...";
                         if (error) return `Error! ${error.message}`;
+                        const sorted = data.notes.sort(this._sortByTime) 
                         return (
-                            data.notes.sort(this._sortByTime).map(thought => (
-                                <Note thought={thought} markdown={this.md} key={`note-${thought.id}`}/> 
-                             ))
+                            <InfiniteScroll
+                                items={sorted}
+                                show={sorted.length - 1}
+                                replace={true}
+                            >
+                                {(thought) => (
+                                    <Note thought={thought} markdown={this.md} key={`note-${thought.id}`}/> 
+                                )}
+                            </InfiniteScroll>
                         )
                     }}
                     </Query>
                 </div>
-                <Mutation<any, {content: string}> mutation={ADD_NOTE}>
+                <Mutation<any, {content: string}> mutation={ADD_NOTE} update={this.updateCache}>
                 {(addNote, {loading, data}) => {
                     return(
                     <textarea
@@ -71,7 +83,7 @@ export default class Thoughtbox extends React.Component<{}, State> {
                     )
                 }}
                 </Mutation>
-            </div>
+            </Box>
         )
     }
 
@@ -92,4 +104,34 @@ export default class Thoughtbox extends React.Component<{}, State> {
         const bDate = new Date(b.publishedAt)
         return aDate.getTime() - bDate.getTime()
     }
+
+    private updateCache(cache: DataProxy, { data }: FetchResult) {
+        if (!data) {
+            return
+        }
+    
+        // Fetch the todos from the cache
+    
+        const existingNotes: {notes: Thought[]} | null = cache.readQuery({
+    
+          query: GET_NOTES
+    
+        });
+    
+        if (!existingNotes) {
+            return
+        }
+        // Add the new todo to the cache
+    
+        const newNote: Thought = data.insert_notes.returning[0];
+    
+        cache.writeQuery({
+    
+          query: GET_NOTES,
+    
+          data: {notes: [newNote, ...existingNotes.notes]}
+    
+        });
+    
+      };
 }

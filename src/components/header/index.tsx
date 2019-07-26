@@ -1,20 +1,23 @@
 import React from 'react'
-import * as style from "./style.module.css";
+// import * as style from "./style.module.css";
+import { Heading, Box } from 'grommet';
 
 export default class Header extends React.Component {
     public render() {
         return (
-            <header className={style.header}>
-                <h1>Process</h1>
-                <nav>
-                    {/* <Link activeClassName={style.active} href="/">
-                        Home
-                    </Link>
-                    <Link activeClassName={style.active} href="/project/new">
-                        New
-                    </Link> */}
-                </nav>
-            </header>
+             <Box
+                tag='header'
+                direction='row'
+                align='center'
+                justify='between'
+                background='brand'
+                pad={{ left: 'medium', right: 'small', vertical: 'small' }}
+                elevation='medium'
+                style={{ zIndex: 1 }}
+                gridArea="appbar"
+            >
+                <Heading level="3" margin="none">Process</Heading>
+            </Box>
         );
     }
 }

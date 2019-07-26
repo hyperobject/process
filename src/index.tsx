@@ -6,6 +6,8 @@ import { ApolloProvider } from 'react-apollo';
 import { InMemoryCache, ApolloLink } from "apollo-boost";
 import ApolloClient from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http';
+import { Grommet } from 'grommet';
+import theme from './style/theme';
 
 const httpLink = createHttpLink({ uri: "https://wip-db.herokuapp.com/v1/graphql" });
 
@@ -25,14 +27,22 @@ const authLink = new ApolloLink((operation, forward) => {
     // Call the next link in the middleware chain.
     return forward(operation);
   });
+
 const client = new ApolloClient({
     link: authLink.concat(httpLink),
     cache: new InMemoryCache()
 });
 
-// or you can use `import gql from 'graphql-tag';` instead
 
 
 
-ReactDOM.render(<ApolloProvider client={client}><App /></ApolloProvider>, document.getElementById('root'));
+
+ReactDOM.render(
+    <ApolloProvider client={client}>
+      <Grommet theme={theme} full>
+        <App />
+      </Grommet>
+    </ApolloProvider>,
+    document.getElementById('root')
+);
 
