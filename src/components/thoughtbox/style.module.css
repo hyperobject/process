@@ -9,7 +9,8 @@
 
 .input {
     font-size: 1em;
-    height: 30px;
+    font-family: inherit;
+    resize: none;
 }
 
 .header {

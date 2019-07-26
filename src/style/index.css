@@ -12,10 +12,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-    box-sizing: border-box;
+#root {
+    height: 100%;
 }
 
-#app {
-    height: 100%;
+* {
+    box-sizing: border-box;
 }

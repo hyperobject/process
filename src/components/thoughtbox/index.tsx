@@ -1,49 +1,48 @@
-import { Component, h } from "preact";
-
+import React from 'react'
 import Remarkable from 'remarkable'
 import Thought from "../../models/thought";
 import Note from "../note";
-import * as style from './style.css'
+import * as style from './style.module.css'
 
 interface State {
     thoughts: Thought[]
 }
-export default class Thoughtbox extends Component<{}, State> {
+export default class Thoughtbox extends React.Component<{}, State> {
     public state = {
         thoughts: []
     }
     private md: Remarkable
 
     public constructor() {
-        super()
+        super({})
         this.md = new Remarkable()
     }
-    public render({}, { thoughts }: State) {
+    public render() {
         return (
-            <div class={style.thoughtbox}>
-                <div class={style.header}>
+            <div className={style.thoughtbox}>
+                <div className={style.header}>
                     <h3>Thoughts</h3>
                     <p>What's on your mind?</p>
                 </div>
-                <div class={style.list}>
+                <div className={style.list}>
                     {
-                        thoughts.sort(this._sortByTime).map(thought => (
+                        this.state.thoughts.sort(this._sortByTime).map(thought => (
                            <Note thought={thought} markdown={this.md}/> 
                         ))
                     }
                 </div>
-                <input
-                    class={style.input}
-                    type="text"
+                <textarea
+                    className={style.input}
                     placeholder="What are you thinking about?"
                     onKeyPress={e => this._inputChange(e)}
+                    rows={4}
                 />
             </div>
         )
     }
 
-    private _inputChange(e: KeyboardEvent) {
-        if (e.key !== 'Enter' || !e.currentTarget) {
+    private _inputChange(e: React.KeyboardEvent) {
+        if (e.key !== 'Enter' || e.shiftKey || !e.currentTarget) {
             return
         }
         const target = e.currentTarget as HTMLInputElement

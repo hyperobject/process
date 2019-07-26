@@ -1,18 +1,18 @@
-import { Component, h } from "preact";
+import React from 'react'
 import Thoughtbox from "../../components/thoughtbox";
-import * as style from "./style.css";
+import * as style from "./style.module.css";
 
 interface Props {
 }
 
 interface State {
 }
-export default class Project extends Component<Props, State> {
-    public render({}: Props, {}: State) {
+export default class Project extends React.Component<Props, State> {
+    public render() {
         return (
-            <div class={style.project}>
+            <div className={style.project}>
                 <Thoughtbox />
-                <div class={style.code} />
+                <div className={style.code} />
                 {/* <div class={style.docs} >
                     <img src="/assets/placeholder.png" />
                     <img src="/assets/placeholder.png" />
