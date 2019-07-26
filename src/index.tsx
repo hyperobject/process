@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom';
 import App from './components/app';
 import "./style/index.css";
 import { ApolloProvider } from 'react-apollo';
-import { gql, InMemoryCache, HttpLink, ApolloLink } from "apollo-boost";
+import { InMemoryCache, ApolloLink } from "apollo-boost";
 import ApolloClient from 'apollo-client'
+import { createHttpLink } from 'apollo-link-http';
 
-const httpLink = new HttpLink({ uri: "https://wip-db.herokuapp.com/v1/graphql" });
+const httpLink = createHttpLink({ uri: "https://wip-db.herokuapp.com/v1/graphql" });
 
 const authLink = new ApolloLink((operation, forward) => {
     if (!forward) {
@@ -31,18 +32,7 @@ const client = new ApolloClient({
 
 // or you can use `import gql from 'graphql-tag';` instead
 
-client
-  .query({
-    query: gql`
-      {
-       notes {
-           content
-           publishedAt
-       } 
-      }
-    `
-  })
-  .then(result => console.log(result));
+
 
 ReactDOM.render(<ApolloProvider client={client}><App /></ApolloProvider>, document.getElementById('root'));
 

@@ -14,9 +14,9 @@ interface Props {
 }
 
 const Note: React.SFC<Props> = ({thought, markdown, ...props}) => (
-    <div className={style.note} key={thought.time}>
-        <span className={style.date}>{dayjs(thought.time).fromNow()}</span>
-        <p className={style.text} dangerouslySetInnerHTML={{__html: markdown.render(thought.text)}} />
+    <div className={style.note} key={thought.id}>
+        <span className={style.date}>{dayjs(thought.publishedAt).fromNow()}</span>
+        <p className={style.text} dangerouslySetInnerHTML={{__html: markdown.render(thought.content)}} />
     </div>
 )
 

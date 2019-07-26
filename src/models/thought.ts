@@ -1,4 +1,5 @@
 export default interface Thought {
-    text: string // TODO: rich text?
-    time: number // TODO: type as timestamp explicitly
+    id: string
+    content: string // TODO: rich text?
+    publishedAt: string // TODO: type as timestamp explicitly
 }
