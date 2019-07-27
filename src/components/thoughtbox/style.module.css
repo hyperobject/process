@@ -1,16 +1,9 @@
-.thoughtbox {
-    grid-area: thought;
-    display: flex;
-    flex-flow: column;
-    justify-content: flex-end;
-    max-height: 100%;
-    overflow: hidden;
-}
 
 .input {
-    font-size: 1em;
-    font-family: inherit;
-    resize: none;
+    /* margin: 10px; */
+    margin-top: 10px;
+    align-self: flex-end;
+    justify-self: flex-end;
 }
 
 .header {
@@ -18,7 +11,8 @@
 }
 
 .list {
-    max-height: calc(100% - 30px);
     overflow-y: scroll;
+    max-height: 100%;
+    scrollbar-color: #aaa transparent;
 }
 

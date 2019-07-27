@@ -1,5 +1,6 @@
 import React from 'react'
 import Thoughtbox from "../../components/thoughtbox";
+import CommitView from '../../components/commitView'
 // import * as style from "./style.module.css";
 import { Grid } from 'grommet';
 
@@ -23,6 +24,7 @@ export default class Project extends React.Component<Props, State> {
                     gridArea="project"
                     style={{minHeight: 0}}
                 >
+                    <CommitView />
                     <Thoughtbox />
                 </Grid>
             // </Box>
