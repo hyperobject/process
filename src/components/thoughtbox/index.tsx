@@ -3,10 +3,16 @@ import Thought from "../../models/thought";
 import Note from "../note";
 import * as style from './style.module.css'
 import gql from 'graphql-tag';
-import { Query, Mutation, MutationFn, FetchResult } from 'react-apollo';
+import { Mutation, MutationFunction, withApollo } from 'react-apollo';
+// import { Query } from '@apollo/react-components'
 import { DataProxy } from 'apollo-cache';
-import { Box, Heading, InfiniteScroll, TextArea } from 'grommet';
+import { Box, Heading, InfiniteScroll, TextArea, Text } from 'grommet';
 import { Spinning } from 'grommet-controls'
+import { FetchResult, ApolloClient } from 'apollo-boost';
+
+interface Props {
+    client: ApolloClient<any>
+}
 
 interface State {
     thoughts: Thought[]
@@ -34,13 +40,27 @@ mutation Add_Note($content: String!) {
     }
 }
 `
-export default class Thoughtbox extends React.Component<{}, State> {
-    constructor() {
-        super({})
+class Thoughtbox extends React.Component<Props, State> {
+    constructor(props: Props) {
+        super(props)
         this.state = {
             thoughts: [],
             loaded: false
         }
+    }
+
+    componentDidMount() {
+        this.props.client.watchQuery({
+            query: GET_NOTES
+        }).subscribe(
+            result => this.setState({
+                loaded: !result.loading,
+                thoughts: Array.from(new Set([
+                    ...result.data.notes,
+                    ...this.state.thoughts
+                ]))
+            })
+        )
     }
     public render() {
         return (
@@ -54,23 +74,23 @@ export default class Thoughtbox extends React.Component<{}, State> {
                 </div> */}
                 <Heading level="3">Notes</Heading>
                 <div className={style.list}>
-                    <Query<{notes: Thought[]}> query={GET_NOTES}>
-                    {({ loading, error, data, client }) => {
-                        if (loading || !data) return(
+                    {/* <Query<{notes: Thought[]}> query={GET_NOTES}>
+                    {(result) => {
+                        if (result.loading || !result.data) return(
                             <Box
                                 style={{minHeight: '100%'}}
                             >
                                 <Spinning kind='pulse' size='medium' />
                             </Box>
                         ) 
-                        if (error) return `Error! ${error.message}`;
+                        if (result.error) return <Text>Error! ${result.error.message}</Text>;
                         if (this.state && !this.state.loaded) {
                             this.setState((prev) => ({
                                 ...prev,
                                 loaded: true
                             }))
                         }
-                        const sorted = data.notes.sort(this._sortByTime) 
+                        const sorted = result.data.notes.sort(this._sortByTime) 
                         return (
                             <InfiniteScroll
                                 items={sorted}
@@ -85,7 +105,22 @@ export default class Thoughtbox extends React.Component<{}, State> {
                             </InfiniteScroll>
                         )
                     }}
-                    </Query>
+                    </Query> */}
+                    {this.state.loaded ?
+                        <InfiniteScroll
+                            items={this.state.thoughts.sort(this._sortByTime)}
+                            // show={sorted.length - 1}
+                            // replace={true}
+                            onMore={() => {console.log("more items please")}}
+                            step={10}
+                        >
+                            {(thought) => (
+                                <Note thought={thought}  key={`note-${thought.id}`}/> 
+                            )}
+                        </InfiniteScroll>
+                    :
+                        <Spinning kind='pulse' size='medium' />
+                    }
                 </div>
                 {this.state && this.state.loaded &&
                 <Mutation<any, {content: string}> mutation={ADD_NOTE} update={this.updateCache}>
@@ -112,7 +147,7 @@ export default class Thoughtbox extends React.Component<{}, State> {
         )
     }
 
-    private _inputChange(e: React.KeyboardEvent, submitInput: MutationFn<any, any>) {
+    private _inputChange(e: React.KeyboardEvent, submitInput: MutationFunction<any, any>) {
         if (e.key !== 'Enter' || e.shiftKey || !e.currentTarget) {
             return
         }
@@ -163,3 +198,5 @@ export default class Thoughtbox extends React.Component<{}, State> {
     
       };
 }
+
+export default withApollo(Thoughtbox)
