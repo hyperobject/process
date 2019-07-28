@@ -1,3 +1,15 @@
-.data tbody {
-    max-height: 100%;
+.commit {
+    cursor: pointer;
+}
+
+.commit:hover {
+    background-color: rgba(0,0,0,0.1);
+}
+
+.commit td {
+    word-wrap: break-word;
+}
+
+.spinner {
+    margin: 0 auto;
 }

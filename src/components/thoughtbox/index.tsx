@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { Mutation, MutationFunction, withApollo } from 'react-apollo';
 // import { Query } from '@apollo/react-components'
 import { DataProxy } from 'apollo-cache';
-import { Box, Heading, InfiniteScroll, TextArea, Text } from 'grommet';
+import { Box, Heading, InfiniteScroll, TextArea } from 'grommet';
 import { Spinning } from 'grommet-controls'
 import { FetchResult, ApolloClient } from 'apollo-boost';
 

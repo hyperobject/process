@@ -14,7 +14,7 @@ export default class Project extends React.Component<Props, State> {
         return (
             // <Box overflow={{ horizontal: 'hidden' }}>
                 <Grid
-                    columns={["flex", "medium"]}
+                    columns={["flex", "1/3"]}
                     rows={["full"]}
                     gap="small"
                     areas={[

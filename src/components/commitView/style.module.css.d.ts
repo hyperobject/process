@@ -1,1 +1,2 @@
-export const data: string;
+export const commit: string;
+export const spinner: string;

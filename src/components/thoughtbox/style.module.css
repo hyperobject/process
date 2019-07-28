@@ -14,5 +14,6 @@
     overflow-y: scroll;
     max-height: 100%;
     scrollbar-color: #aaa transparent;
+    word-break: break-word;
 }
 
