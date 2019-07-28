@@ -56,7 +56,6 @@ export default class Thoughtbox extends React.Component<{}, State> {
                 <div className={style.list}>
                     <Query<{notes: Thought[]}> query={GET_NOTES}>
                     {({ loading, error, data, client }) => {
-                        console.log(client.typeDefs)
                         if (loading || !data) return(
                             <Box
                                 style={{minHeight: '100%'}}
