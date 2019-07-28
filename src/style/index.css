@@ -18,4 +18,5 @@ body {
 
 * {
     box-sizing: border-box;
+    min-height: 0;
 }

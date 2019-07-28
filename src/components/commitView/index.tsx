@@ -1,20 +1,30 @@
 import React from 'react'
-import { Heading, DataTable, Text, Box } from 'grommet';
-import { CommitNode, Commit } from '../../models/commitNode'
-import { gql } from 'apollo-boost';
+import { Heading, Box, Table, TableHeader, TableRow, TableCell, TableBody, InfiniteScroll } from 'grommet';
+import { Commit } from '../../models/commitNode'
+import { gql, ApolloClient } from 'apollo-boost';
 import { Query } from 'react-apollo';
 import { Spinning } from 'grommet-controls'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+// import * as style from './style.module.css'
+dayjs.extend(relativeTime);
 
 interface CommitQuery {
 repository: {
     ref: {
       target: {
         history: {
-          nodes: CommitNode[]
+          nodes: Commit[]
         }
       }
     } 
   }
+}
+
+interface State {
+    commits: Commit[]
+    cursor: string | null
 }
 
 //TODO: configure dynamic number and repo
@@ -44,53 +54,83 @@ query GetAllCommits {
 }
 `
 
-const CommitView: React.SFC = () => {
-    return (
-        <Box
-            gridArea="code"
-        >
-            <Heading level="3">Commits</Heading>
-            <Query<CommitQuery>
-                query={GET_ALL_COMMITS}
-            >
-                {({ loading, error, data, client }) => {
-                    if (loading || !data) return(
-                            <Spinning kind='pulse' size='medium' />
-                    ) 
-                    if (error) return `Error! ${error.message}`;
-                    const commitData = data.repository.ref.target.history.nodes
-                    console.warn(commitData)
+class CommitView extends React.Component<{}, State> {
+    private apollo: ApolloClient<any> | null
+    constructor() {
+        super({});
+        this.state = {
+            commits: [],
+            cursor: null
+        }
+        this.apollo = null
+    }
 
-                    return (
-                        <DataTable
-                            alignSelf="start"
-                            columns={[
-                                {
-                                    property: 'abbreviatedOid',
-                                    primary: true,
-                                    header: <Text>Commit</Text>
-                                },
-                                {
-                                    property: 'author',
-                                    render: (datum: Commit) => <Text>{datum.author.user.login}</Text>,
-                                    header: <Text>Author</Text>
-                                }, 
-                                {
-                                    property: 'messageHeadline',
-                                    header: <Text>Description</Text>
-                                }
-                            ]}
-                            data={commitData}
-                            style={{
-                                height: "auto",
-                                width: "100%"
-                            }}
-                        />
-                    )
-                }}
-            </Query>
-        </Box>
-    )
+    render() {
+        return (
+            <Box
+                gridArea="code"
+            >
+                <Heading level="3">Commits</Heading>
+                <Query<CommitQuery>
+                    query={GET_ALL_COMMITS}
+                >
+                    {({ loading, error, data, client }) => {
+                        this.apollo = client
+                        if (loading || !data) return(
+                                <Spinning kind='pulse' size='medium' />
+                        ) 
+                        if (error) return `Error! ${error.message}`;
+                        const commitData = data.repository.ref.target.history.nodes
+                        if (this.state.commits === commitData) {
+                            return null
+                        }
+
+                        this.setState(() => ({
+                            commits: commitData
+                        }))
+                        return null
+                    }}
+                </Query>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableCell scope="col">
+                        </TableCell>
+                        <TableCell scope="col">
+                            Commit
+                        </TableCell>
+                        <TableCell scope="col">
+                            Author
+                        </TableCell>
+                        <TableCell scope="col">
+                            Summary
+                        </TableCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <InfiniteScroll
+                            renderMarker={marker => (
+                                <TableRow>
+                                    <TableCell>{marker}</TableCell>
+                                </TableRow>
+                            )}
+                            step={10}
+                            items={this.state.commits}
+                        >
+                            {(commit: Commit) => (
+                                <TableRow key={commit.abbreviatedOid}>
+                                    <TableCell>{dayjs(commit.authoredDate).fromNow()}</TableCell>
+                                    <TableCell>{commit.abbreviatedOid}</TableCell>
+                                    <TableCell>{commit.author.user.login}</TableCell>
+                                    <TableCell>{commit.messageHeadline}</TableCell>
+                                </TableRow>
+                            )}
+                        </InfiniteScroll>
+                    </TableBody>
+                </Table>
+            </Box>
+        )
+    }
 }
 
 export default CommitView
