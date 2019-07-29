@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 import * as style from './style.module.css'
+import { AppContextInterface, withAppContext } from '../../models/context';
 dayjs.extend(relativeTime);
 
 interface CommitQuery {
@@ -28,6 +29,7 @@ repository: {
 
 interface Props {
     client: ApolloClient<any>
+    appContext?: AppContextInterface
 }
 
 interface State {
@@ -38,9 +40,9 @@ interface State {
 
 //TODO: configure dynamic number and repo
 const GET_FIRST_COMMITS = gql`
-query { 
-  repository(owner: "connorhudson", name: "crossorigin.me") {
-    ref(qualifiedName: "master") {
+query GetFirstCommits($repoOwner: String!, $repoName: String!, $branch: String!) { 
+  repository(owner: $repoOwner, name: $repoName) {
+    ref(qualifiedName: $branch) {
       target {
         ... on Commit {
           history(first: 30) {
@@ -68,9 +70,9 @@ query {
 `
 
 const GET_MORE_COMMITS = gql`
-query ($cursor: String!){ 
-  repository(owner: "connorhudson", name: "crossorigin.me") {
-    ref(qualifiedName: "master") {
+query GetMoreCommits($cursor: String!, $repoOwner: String!, $repoName: String!, $branch: String!){ 
+  repository(owner: $repoOwner, name: $repoName) {
+    ref(qualifiedName: $branch) {
       target {
         ... on Commit {
           history(first: 30, after: $cursor) {
@@ -110,9 +112,19 @@ class CommitView extends React.Component<Props, State> {
     }
 
     async componentDidMount() {
+        if (!this.props.appContext) {
+          console.warn("NO CONTEXT", this.props.appContext)
+          return
+        }
+        console.warn(this.props.appContext)
         let result: ApolloQueryResult<CommitQuery>
         result = await this.props.client.query({
-            query: GET_FIRST_COMMITS
+            query: GET_FIRST_COMMITS,
+            variables: {
+              repoOwner: this.props.appContext.repoOwner,
+              repoName: this.props.appContext.repoName,
+              branch: this.props.appContext.branch
+            }
         })
 
         const history = result.data.repository.ref.target.history 
@@ -168,7 +180,7 @@ class CommitView extends React.Component<Props, State> {
                                     <TableCell>{marker}</TableCell>
                                 </TableRow>
                             )}
-                            scrollableAncestor="window"
+                            scrollableAncestor="node"
                             step={20}
                             items={this.state.commits}
                             onMore={() => this._loadMore()}
@@ -208,8 +220,7 @@ class CommitView extends React.Component<Props, State> {
     }
 
     private async _loadMore() {
-        console.warn("LOADING MORE")
-        if (this.state.allLoaded) {
+        if (this.state.allLoaded || !this.props.appContext) {
             return
         }
 
@@ -217,7 +228,12 @@ class CommitView extends React.Component<Props, State> {
 
         result = await this.props.client.query({
             query: GET_MORE_COMMITS,
-            variables: {cursor: this.state.cursor}
+            variables: {
+              cursor: this.state.cursor,
+              repoName: this.props.appContext.repoName,
+              repoOwner: this.props.appContext.repoOwner,
+              branch: this.props.appContext.branch
+            }
         })
 
         const history = result.data.repository.ref.target.history 
@@ -234,4 +250,4 @@ class CommitView extends React.Component<Props, State> {
     }
 }
 
-export default withApollo(CommitView)
+export default withAppContext(withApollo(CommitView))

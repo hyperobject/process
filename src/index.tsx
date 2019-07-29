@@ -8,6 +8,7 @@ import ApolloClient from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http';
 import { Grommet } from 'grommet';
 import theme from './style/theme';
+import { AppContextProvider, AppContextInterface } from './models/context';
 
 const httpLink = createHttpLink({ uri: "https://wip-db.herokuapp.com/v1/graphql" });
 
@@ -33,14 +34,20 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-
+const DefaultAppContext: AppContextInterface = {
+  repoName: "process",
+  repoOwner: "connorhudson",
+  branch: "master"
+}
 
 
 
 ReactDOM.render(
     <ApolloProvider client={client}>
       <Grommet theme={theme} full>
-        <App />
+        <AppContextProvider value={DefaultAppContext}>
+          <App />
+        </AppContextProvider>
       </Grommet>
     </ApolloProvider>,
     document.getElementById('root')

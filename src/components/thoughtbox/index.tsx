@@ -6,12 +6,14 @@ import gql from 'graphql-tag';
 import { Mutation, MutationFunction, withApollo } from 'react-apollo';
 // import { Query } from '@apollo/react-components'
 import { DataProxy } from 'apollo-cache';
-import { Box, Heading, InfiniteScroll, TextArea } from 'grommet';
+import { Box, Heading, InfiniteScroll, TextArea, Grid } from 'grommet';
 import { Spinning } from 'grommet-controls'
 import { FetchResult, ApolloClient } from 'apollo-boost';
+import { withAppContext, AppContextInterface } from '../../models/context';
 
 interface Props {
     client: ApolloClient<any>
+    appContext?: AppContextInterface
 }
 
 interface State {
@@ -20,8 +22,8 @@ interface State {
 }
 
 const GET_NOTES = gql`
-query Get_Notes {
-    notes {
+query Get_Notes($repoName: String!, $repoOwner: String!) {
+    notes(where: {repository: {_eq: $repoName}, _and: {owner: {_eq: $repoOwner}}}) {
         id
         content
         publishedAt
@@ -30,8 +32,8 @@ query Get_Notes {
 `
 
 const ADD_NOTE = gql`
-mutation Add_Note($content: String!) {
-    insert_notes(objects: {owner: "connorhudson", repository: "process", content: $content}) {
+mutation Add_Note($content: String!, $repoName: String!, $repoOwner: String!) {
+    insert_notes(objects: {owner: $repoOwner, repository: $repoName, content: $content}) {
         returning {
             id
             content
@@ -50,8 +52,15 @@ class Thoughtbox extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        if (!this.props.appContext) {
+            return
+        }
         this.props.client.watchQuery({
-            query: GET_NOTES
+            query: GET_NOTES,
+            variables: {
+                repoName: this.props.appContext.repoName,
+                repoOwner: this.props.appContext.repoOwner
+            }
         }).subscribe(
             result => this.setState({
                 loaded: !result.loading,
@@ -73,39 +82,15 @@ class Thoughtbox extends React.Component<Props, State> {
                     <p>What's on your mind?</p>
                 </div> */}
                 <Heading level="3">Notes</Heading>
+                <Grid
+                    columns={["full"]}
+                    rows={["flex", "75px"]}
+                    areas={[
+                        { name: "notes-list", start: [0,0], end: [0,0] },
+                        { name: "notes-field", start: [0,1], end: [0,1] }
+                    ]}
+                >
                 <div className={style.list}>
-                    {/* <Query<{notes: Thought[]}> query={GET_NOTES}>
-                    {(result) => {
-                        if (result.loading || !result.data) return(
-                            <Box
-                                style={{minHeight: '100%'}}
-                            >
-                                <Spinning kind='pulse' size='medium' />
-                            </Box>
-                        ) 
-                        if (result.error) return <Text>Error! ${result.error.message}</Text>;
-                        if (this.state && !this.state.loaded) {
-                            this.setState((prev) => ({
-                                ...prev,
-                                loaded: true
-                            }))
-                        }
-                        const sorted = result.data.notes.sort(this._sortByTime) 
-                        return (
-                            <InfiniteScroll
-                                items={sorted}
-                                // show={sorted.length - 1}
-                                // replace={true}
-                                onMore={() => {console.log("more items please")}}
-                                step={10}
-                            >
-                                {(thought) => (
-                                    <Note thought={thought}  key={`note-${thought.id}`}/> 
-                                )}
-                            </InfiniteScroll>
-                        )
-                    }}
-                    </Query> */}
                     {this.state.loaded ?
                         <InfiniteScroll
                             items={this.state.thoughts.sort(this._sortByTime)}
@@ -123,7 +108,7 @@ class Thoughtbox extends React.Component<Props, State> {
                     }
                 </div>
                 {this.state && this.state.loaded &&
-                <Mutation<any, {content: string}> mutation={ADD_NOTE} update={this.updateCache}>
+                <Mutation<any, {content: string}> mutation={ADD_NOTE} update={this.updateCache.bind(this)}>
                 {(addNote, {loading, data}) => {
                     return(
                         <TextArea
@@ -131,7 +116,7 @@ class Thoughtbox extends React.Component<Props, State> {
                             // onChange={}
                             onKeyPress={e => this._inputChange(e, addNote)} 
                             className={style.input}
-                            size="small"
+                            size="medium"
                         />
                     // <textarea
                     //     className={style.input}
@@ -143,12 +128,13 @@ class Thoughtbox extends React.Component<Props, State> {
                 }}
                 </Mutation>
                 }
+                </Grid>
             </Box>
         )
     }
 
     private _inputChange(e: React.KeyboardEvent, submitInput: MutationFunction<any, any>) {
-        if (e.key !== 'Enter' || e.shiftKey || !e.currentTarget) {
+        if (e.key !== 'Enter' || e.shiftKey || !e.currentTarget || !this.props.appContext) {
             return
         }
         e.preventDefault()
@@ -157,7 +143,11 @@ class Thoughtbox extends React.Component<Props, State> {
             return
         }
         
-        submitInput({variables: {content: target.value}})
+        submitInput({variables:{
+            content: target.value,
+            repoName: this.props.appContext.repoName,
+            repoOwner: this.props.appContext.repoOwner
+        }})
         target.value = ''
 
     }
@@ -169,15 +159,18 @@ class Thoughtbox extends React.Component<Props, State> {
     }
 
     private updateCache(cache: DataProxy, { data }: FetchResult) {
-        if (!data) {
+        if (!data || !this.props.appContext) {
             return
         }
     
         // Fetch the todos from the cache
     
         const existingNotes: {notes: Thought[]} | null = cache.readQuery({
-    
-          query: GET_NOTES
+          query: GET_NOTES,
+          variables: {
+              repoName: this.props.appContext.repoName,
+              repoOwner: this.props.appContext.repoOwner
+          }
     
         });
     
@@ -191,6 +184,10 @@ class Thoughtbox extends React.Component<Props, State> {
         cache.writeQuery({
     
           query: GET_NOTES,
+          variables: {
+            repoName: this.props.appContext.repoName,
+            repoOwner: this.props.appContext.repoOwner
+          },
     
           data: {notes: [newNote, ...existingNotes.notes]}
     
@@ -199,4 +196,4 @@ class Thoughtbox extends React.Component<Props, State> {
       };
 }
 
-export default withApollo(Thoughtbox)
+export default withAppContext(withApollo(Thoughtbox))

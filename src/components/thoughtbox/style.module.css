@@ -2,12 +2,12 @@
 .input {
     /* margin: 10px; */
     margin-top: 10px;
-    align-self: flex-end;
-    justify-self: flex-end;
+    grid-area: notes-field;
 }
 
 .header {
     margin-bottom: auto;
+    grid-area: notes-header;
 }
 
 .list {
@@ -15,5 +15,6 @@
     max-height: 100%;
     scrollbar-color: #aaa transparent;
     word-break: break-word;
+    grid-area: notes-list;
 }
 
