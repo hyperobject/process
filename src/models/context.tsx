@@ -5,7 +5,10 @@ export interface AppContextInterface {
     repoName: string,
     repoOwner: string,
     branch: string,
-    currentCommit?: Commit
+    currentTab: number,
+    currentCommit?: Commit,
+    setCommit: (commit: Commit) => void,
+    setTab: (tab: number) => void
 }
 
 const ctxt = React.createContext<AppContextInterface | null>(null);
