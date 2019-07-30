@@ -8,7 +8,8 @@ export interface AppContextInterface {
     currentTab: number,
     currentCommit?: Commit | null,
     setCommit: (commit: Commit | null) => void,
-    setTab: (tab: number) => void
+    setTab: (tab: number) => void,
+    setRepo: (owner: string, name: string) => void
 }
 
 const ctxt = React.createContext<AppContextInterface | null>(null);

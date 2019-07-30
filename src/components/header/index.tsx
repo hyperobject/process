@@ -11,7 +11,7 @@ export default class Header extends React.Component {
                 align='center'
                 justify='between'
                 background='brand'
-                pad={{ left: 'medium', right: 'small', vertical: 'small' }}
+                pad={{ left: '10px', right: 'small', vertical: 'small' }}
                 elevation='medium'
                 style={{ zIndex: 1 }}
                 gridArea="appbar"

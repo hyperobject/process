@@ -1,5 +1,6 @@
 import React from 'react';
 import Project from "../routes/project";
+import SetRepo from '../routes/setRepo'
 import Header from "./header";
 
 import * as style from '../style/app.module.css'
@@ -13,8 +14,8 @@ export default class App extends React.Component<{}, AppContextInterface> {
     //     this.currentUrl = e.url;
     // };
     private DefaultAppContext = {
-        repoName: "process",
-        repoOwner: "connorhudson",
+        repoName: "",
+        repoOwner: "",
         branch: "master",
         currentTab: 0
     }
@@ -24,7 +25,8 @@ export default class App extends React.Component<{}, AppContextInterface> {
         this.state = {
             ...this.DefaultAppContext,
             setCommit: this._setCommit,
-            setTab: this._setTab
+            setTab: this._setTab,
+            setRepo: this._setRepo
         }
     }
 
@@ -34,7 +36,7 @@ export default class App extends React.Component<{}, AppContextInterface> {
                 <div id={style.app}>
                     <Grid
                         columns={["full"]}
-                        rows={["xxsmall", "xxsmall", "flex"]}
+                        rows={["xxsmall", "40px", "flex"]}
                         areas={[
                             { name: "appbar", start: [0,0], end: [0,0] },
                             { name: "repo", start: [0,1], end: [0,1] },
@@ -44,8 +46,14 @@ export default class App extends React.Component<{}, AppContextInterface> {
                         gap="small"
                     >
                         <Header />
-                        <Heading level="2" gridArea="repo" margin="none">chudson/CodeProject</Heading>
-                        <Project />
+                        {this.state.repoName === "" || this.state.repoOwner === "" ?
+                            <SetRepo />
+                        :
+                            <>
+                            <Heading level="2" gridArea="repo" margin={{left: "10px", top: "15px", bottom: "0"}}>{`${this.state.repoOwner}/${this.state.repoName}`}</Heading>
+                            <Project />
+                            </>
+                        }
                     </Grid>
                 </div>
             </AppContextProvider>
@@ -62,6 +70,13 @@ export default class App extends React.Component<{}, AppContextInterface> {
     private _setTab = (tab: number) => {
         this.setState({
             currentTab: tab
+        })
+    }
+
+    private _setRepo = (owner: string, name: string) => {
+        this.setState({
+            repoName: name,
+            repoOwner: owner
         })
     }
 }

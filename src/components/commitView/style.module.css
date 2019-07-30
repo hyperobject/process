@@ -13,3 +13,9 @@
 .spinner {
     margin: 0 auto;
 }
+
+.container {
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
