@@ -1,5 +1,5 @@
 import React from 'react'
-import { InfiniteScroll, TextArea } from 'grommet';
+import { InfiniteScroll, TextArea, Grid, Box } from 'grommet';
 import Note from '../note';
 import { Mutation, MutationFunction } from 'react-apollo';
 import { Spinning } from 'grommet-controls'
@@ -56,6 +56,14 @@ class AllNotes extends React.Component<Props, State> {
         }
 
 
+        
+    }
+
+    componentDidMount() {
+        if (!this.props.appContext) {
+            return 
+        }
+
         this.props.client.watchQuery({
             query: GET_NOTES,
             variables: {
@@ -74,14 +82,21 @@ class AllNotes extends React.Component<Props, State> {
     }
     public render() {
         return(
-            <>
+            <Grid
+                columns={["full"]}
+                rows={["flex", "75px"]}
+                areas={[
+                    { name: "notes-list", start: [0,0], end: [0,0] },
+                    { name: "notes-field", start: [0,1], end: [0,1] }
+                ]}
+                style={{height: "100%"}}
+            >
             <div className={style.list}>
                 {this.state.loaded ?
                     <InfiniteScroll
                         items={this.state.thoughts.sort(this.props.sortByTime)}
                         // show={sorted.length - 1}
                         // replace={true}
-                        onMore={() => {console.log("more items please")}}
                         step={10}
                     >
                         {(thought) => (
@@ -89,7 +104,9 @@ class AllNotes extends React.Component<Props, State> {
                         )}
                     </InfiniteScroll>
                 :
-                    <Spinning kind='pulse' size='medium' />
+                    <Box width="full" align="center" margin={{top: "small"}}>
+                        <Spinning kind='pulse' size='medium' />
+                    </Box>
                 }
             </div>
             {this.state && this.state.loaded &&
@@ -102,6 +119,10 @@ class AllNotes extends React.Component<Props, State> {
                         onKeyPress={e => this._inputChange(e, addNote)} 
                         className={style.input}
                         size="medium"
+                        style={{
+                            fontSize: "14px",
+                            fontWeight: "normal"
+                        }}
                     />
                 // <textarea
                 //     className={style.input}
@@ -113,7 +134,7 @@ class AllNotes extends React.Component<Props, State> {
             }}
             </Mutation>
             }
-            </>
+            </Grid>
         )
     }
 

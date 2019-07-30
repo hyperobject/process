@@ -113,10 +113,8 @@ class CommitView extends React.Component<Props, State> {
 
     async componentDidMount() {
         if (!this.props.appContext) {
-          console.warn("NO CONTEXT", this.props.appContext)
           return
         }
-        console.warn(this.props.appContext)
         let result: ApolloQueryResult<CommitQuery>
         result = await this.props.client.query({
             query: GET_FIRST_COMMITS,
@@ -192,7 +190,7 @@ class CommitView extends React.Component<Props, State> {
                                     style={this.props.appContext && this.props.appContext.currentCommit === commit ? {
                                       backgroundColor: "rgba(255,255,0,0.1)"
                                     }: {}}
-                                    onClickCapture={() => this.props.appContext && this.props.appContext.setCommit(commit)}
+                                    onClickCapture={() => this._handleCommitClick(commit)}
                                 >
                                     <TableCell>{dayjs(commit.authoredDate).fromNow()}</TableCell>
                                     <TableCell>{commit.abbreviatedOid}</TableCell>
@@ -250,6 +248,20 @@ class CommitView extends React.Component<Props, State> {
             ])).sort(this._sortByTime),
             allLoaded: !history.pageInfo.hasNextPage
         })
+    }
+
+    private _handleCommitClick(commit: Commit) {
+      if (!this.props.appContext) {
+        return
+      }
+
+      if (commit === this.props.appContext.currentCommit) {
+        this.props.appContext.setCommit(null)
+        this.props.appContext.setTab(0)
+        return
+      }
+
+      this.props.appContext.setCommit(commit)
     }
 }
 

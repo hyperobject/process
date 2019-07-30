@@ -6,8 +6,8 @@ export interface AppContextInterface {
     repoOwner: string,
     branch: string,
     currentTab: number,
-    currentCommit?: Commit,
-    setCommit: (commit: Commit) => void,
+    currentCommit?: Commit | null,
+    setCommit: (commit: Commit | null) => void,
     setTab: (tab: number) => void
 }
 
@@ -40,7 +40,6 @@ export const withAppContext = <P extends {}>(Component: React.ComponentType<P>) 
       return (
         <AppContextConsumer>
           {(context: AppContextInterface | null ) => {
-              console.warn("CONTEXT IS", context)
           return(<Component {...this.props} appContext={context} />)
           }}
         </AppContextConsumer>

@@ -52,7 +52,7 @@ export default class App extends React.Component<{}, AppContextInterface> {
         );
     }
 
-    private _setCommit = (commit: Commit) => {
+    private _setCommit = (commit: Commit | null) => {
         this.setState({
             currentCommit: commit,
             currentTab: 1
