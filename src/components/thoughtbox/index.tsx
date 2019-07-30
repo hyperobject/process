@@ -23,26 +23,26 @@ class Thoughtbox extends React.Component<Props> {
                 padding: "10px"
             }}>
                 <Heading level="3">Notes</Heading>
-                
-                        <Grid
-                            columns={["full"]}
-                            rows={["flex", "75px"]}
-                            areas={[
-                                { name: "notes-list", start: [0,0], end: [0,0] },
-                                { name: "notes-field", start: [0,1], end: [0,1] }
-                            ]}
-                        >
-                            <Tabs
-                                activeIndex={this.props.appContext.currentTab}
-                                onActive={(tab) => this.props.appContext ? this.props.appContext.setTab(tab) : null}
-                            >
-                                <Tab title={"all"}>
-                                    <AllNotes client={this.props.client} sortByTime={this._sortByTime}/>
-                                </Tab>
-                                <Tab title={"search"}></Tab>
-                            </Tabs>
-                        </Grid>
-
+                <Grid
+                    columns={["full"]}
+                    rows={["flex", "75px"]}
+                    areas={[
+                        { name: "notes-list", start: [0,0], end: [0,0] },
+                        { name: "notes-field", start: [0,1], end: [0,1] }
+                    ]}
+                >
+                    <Tabs
+                        activeIndex={this.props.appContext.currentTab}
+                        onActive={(tab) => this.props.appContext ? this.props.appContext.setTab(tab) : null}
+                    >
+                        <Tab title={"all"}>
+                            <AllNotes client={this.props.client} sortByTime={this._sortByTime}/>
+                        </Tab>
+                        {this.props.appContext.currentCommit &&
+                        <Tab title={this.props.appContext.currentCommit.abbreviatedOid}></Tab>
+                        }
+                    </Tabs>
+                </Grid>
             </Box>
         )
     }

@@ -189,6 +189,9 @@ class CommitView extends React.Component<Props, State> {
                                 <TableRow
                                     key={commit.abbreviatedOid}
                                     className={style.commit}
+                                    style={this.props.appContext && this.props.appContext.currentCommit === commit ? {
+                                      backgroundColor: "rgba(255,255,0,0.1)"
+                                    }: {}}
                                     onClickCapture={() => this.props.appContext && this.props.appContext.setCommit(commit)}
                                 >
                                     <TableCell>{dayjs(commit.authoredDate).fromNow()}</TableCell>
