@@ -139,6 +139,7 @@ class CommitView extends React.Component<Props, State> {
             <Box
                 gridArea="code"
                 className={style.container}
+                margin={"10px"}
             >
                 <Heading level="3">Commits</Heading>
                 <div style={{
